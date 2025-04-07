@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Combobox</title>
+    <script src="database.js" type="module"></script>
+    <script src="combobox.js" type="module"></script>
+    <script src="form.js" type="module"></script>  
+    <script src="summary.js" type="module"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+    <!-- <link rel="stylesheet" href="chart-styles.css"> -->
+
+</head>
+<body class="scrollable-content">
+    <div id="app-container">
+        <div class="nav-tabs">
+            <button class="tab active" data-target="dashboard">Dashboard</button>
+            <button class="tab" data-target="transactions">Transactions</button>
+            <button class="tab" data-target="comparisons">Comparisons</button>
+        </div>
+        
+        <div id="content-container">
+            <!-- Dashboard View -->
+            <div id="dashboard-view" class="tab-content active">
+                <div class="summary-cards"></div>
+                <div class="transactions-list scrollable-content"></div>
+                <div id="transactions-container"></div>
+            </div>
+    
+            <!-- Transactions View -->
+            <div id="transactions-view" class="tab-content">
+                <div class="filters"></div>
+                <div class="forms-container"></div>
+                
+            </div>
+    
+            <!-- Comparisons View -->
+            <div id="comparisons-view" class="tab-content">
+                <div class="month-selector"></div>
+                <div class="comparison-grid"></div>
+                <div id="chart-container" style="width: 50%; margin: 0 auto;"></div>
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>
