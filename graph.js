@@ -14,6 +14,7 @@ export class ExpenseComparisonChart {
         await this.updateChart();
     }
 
+
     async updateChart(year = null, month = null) {
         // Get data for all months if no specific month/year provided
         const estimates = await getEstimatedExpenses(year, month);
@@ -175,9 +176,10 @@ export class ExpenseComparisonChart {
 
 export class CategoryPieChart {
     constructor(canvasID) {
-        this.canvas = document.createElement(canvasID);
+        this.canvas = document.createElement("canvas");
+        this.canvas.id = canvasID;
         this.chart = null;
-        this.categories = []
+        this.categories = [];
     }
 
     async loadCategories() {
@@ -186,6 +188,11 @@ export class CategoryPieChart {
         } catch (error) {
             console.error("Error loading categories:", error);
         }
+    }
+
+    getCategoryName(id) {
+        const category = this.categories.find(cat => cat.id === id);
+        return category ? category.name : "Unknown";
     }
 
     async render() {
@@ -217,7 +224,7 @@ export class CategoryPieChart {
         this.chart = new Chart(this.canvas.getContext('2d'), {
             type: 'pie',
             data: {
-                labels: Object.keys(categoryData),
+                labels: labels,
                 datasets: [{
                     label: "Expenses by Category",
                     data: dataValues,
