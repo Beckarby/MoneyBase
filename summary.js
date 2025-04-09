@@ -130,3 +130,15 @@ export class SummaryCard {
     }
 
 }
+
+export async function getCategorySpending(year, month) {
+    const transactions = await getTransactions();
+    return transactions.filter(t => 
+      new Date(t.date).getFullYear() === year &&
+      new Date(t.date).getMonth()+1 === month
+    ).reduce((acc, t) => {
+      const cat = getCategoryName(t.category);
+      acc[cat] = (acc[cat] || 0) + t.amount;
+      return acc;
+    }, {});
+  }

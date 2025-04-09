@@ -30,8 +30,9 @@ export class EstimatedForm {
         form.classList.add("estimated-form");
 
         const title = document.createElement("h2");
-        title.textContent = "Estimates Form"; // or "Budget Estimates"
+        title.textContent = "Estimates";
         form.prepend(title);
+        title.classList.add("form-header");
 
         const amountGroup = document.createElement("div");
         amountGroup.classList.add("form-group");

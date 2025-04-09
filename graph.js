@@ -1,4 +1,4 @@
-import { getEstimatedExpenses, getTransactions } from "./database.js";
+import { getEstimatedExpenses, getTransactions, getCategories } from "./database.js";
 
 export class ExpenseComparisonChart {
     constructor() {
@@ -171,4 +171,76 @@ export class ExpenseComparisonChart {
             }
         });
     }
+}
+
+export class CategoryPieChart {
+    constructor(canvasID) {
+        this.canvas = document.createElement(canvasID);
+        this.chart = null;
+        this.categories = []
+    }
+
+    async loadCategories() {
+        try {
+            this.categories = await getCategories();
+        } catch (error) {
+            console.error("Error loading categories:", error);
+        }
+    }
+
+    async render() {
+        await this.loadCategories();
+        if (!this.canvas) {
+            console.error("Canvas element not found in the document.")
+            return;
+        }
+        await this.updateChart();
+    }
+
+    async updateChart() {
+        await this.loadCategories();
+        if (!this.canvas) return;
+        const transactions = await getTransactions();
+        const categoryData = transactions.reduce((acc, transaction) => {
+            if (transaction.type === 'expense') {
+                const categoryName = this.getCategoryName(transaction.category);
+                acc[categoryName] = (acc[categoryName] || 0) + transaction.amount;
+            }
+            return acc;
+        }, {});
+
+        const labels = Object.keys(categoryData);
+        const dataValues = Object.values(categoryData);
+
+        if (this.chart) this.chart.destroy();
+
+        this.chart = new Chart(this.canvas.getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: Object.keys(categoryData),
+                datasets: [{
+                    label: "Expenses by Category",
+                    data: dataValues,
+                    backgroundColor: [
+                        '#FF6384', '#36A2EB', '#FFCE56',
+                        '#4BC0C0', '#9966FF', '#FF9F40'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: false,
+                        // text: 'Expenses by Category'
+                    }
+                }
+            }
+        });
+    }
+
 }

@@ -1,5 +1,6 @@
 import { getEstimatedExpenses } from "./database.js";
 import { ExpenseComparisonChart } from "./graph.js";
+import { getCategorySpending } from "./summary.js";
 
 export class ComparisonView {
     constructor() {
@@ -31,7 +32,7 @@ export class ComparisonView {
                     const [year, month] = monthInput.value.split("-");
                     await this.chart.updateChart(parseInt(year), parseInt(month));
                 } catch (error) {
-                    this.showError("Failed to load data for selected month");
+                    console.log("Failed to load data for selected month");
                 }
             });
 
@@ -42,7 +43,7 @@ export class ComparisonView {
                     await this.chart.updateChart();
                     monthInput.value = "";
                 } catch (error) {
-                    this.showError("Failed to load all months data");
+                    console.log("Failed to load all months data");
                 }
             });
 
@@ -51,12 +52,26 @@ export class ComparisonView {
             
             // Render the chart
             await this.chart.render(chartContainer);
-        } catch (error) {
-            this.showError("Failed to initialize comparison view");
-        }
-    }
-
-    showError(message) {
+            const categoryData = await getCategorySpending(2023, 11);
+            const pieCanvas = document.createElement('canvas');
+            chartContainer.appendChild(pieCanvas);
         
-    }
+            new Chart(pieCanvas.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(categoryData),
+                    datasets: [{
+                        data: Object.values(categoryData),
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+                    }]
+                }
+            });
+            } catch (error) {
+                console.log("Failed to initialize comparison view");
+            }
+
+        
+            }
+
+    
 }

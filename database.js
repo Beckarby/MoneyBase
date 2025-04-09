@@ -100,7 +100,8 @@ export function getTransactions() {
 export async function deleteTransaction(id) {
     try {
         await new Promise((resolve, reject) => {
-            const transaction = db.transaction(['main'], 'readwrite').objectStore('main');
+            const transaction = db.transaction(['main'], 'readwrite');
+            const store = transaction.objectStore('main');
             const request = store.delete(id);
 
              request.onsuccess = (event) => resolve(event.target.result);
@@ -110,6 +111,23 @@ export async function deleteTransaction(id) {
     } catch (error) {
         console.error('Error in deleteTransaction:', error);
     }
+}
+
+export function updateTransaction(id, newData) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(['main'], 'readwrite');
+        const store = transaction.objectStore('main');
+        const request = store.get(id);
+        request.onsuccess = (event) => {
+            const existingData = event.target.result;
+            const updatedTransaction = {...existingData, ...newData};
+            const putRequest = store.put(updatedTransaction);
+
+            putRequest.onsuccess = () => resolve();
+            putRequest.onerror = (event) => reject(event.target.error);
+        };
+        request.onerror = (event) => reject(event.target.error);
+    })
 }
 
 

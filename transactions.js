@@ -1,4 +1,4 @@
-import { getTransactions, getCategories, deleteTransaction } from "./database.js";
+import { getTransactions, getCategories, deleteTransaction, updateTransaction } from "./database.js";
 import { SummaryCard } from "./summary.js";
 import { Toast } from "./toast.js";
 
@@ -122,7 +122,10 @@ export class TransactionList {
                 <td>${transaction.type}</td>
                 <td>${this.getCategoryName(transaction.category)}</td>
                 <td>$${transaction.amount.toFixed(2)}</td>
-                <td><button class="delete-btn" data-id="${transaction.id}">Delete</button></td>
+                <td>
+                <button class="edit-btn" data-id="${transaction.id}">Edit</button>
+                <button class="delete-btn" data-id="${transaction.id}">Delete</button>
+                </td>
             </tr>`
         ).join("");
 
@@ -136,10 +139,11 @@ export class TransactionList {
                 if (confirm("You sure you want to delete this transaction?")) {
                     try {
                         await deleteTransaction(id);
-                        const summaryInstance = new SummaryCard();
-                        summaryInstance._updateSummary();
+                        //const summaryInstance = new SummaryCard();
+                        //summaryInstance._updateSummary();
                         const toast = new Toast("Transaction deleted successfully.");
                         document.body.appendChild(toast.render());
+                        document.dispatchEvent(new CustomEvent("transactionDeleted"));
                         this.loadTransactions();
                     } catch (error) {
                         const toast = new Toast(`Error: ${error.message} hola`);
@@ -147,6 +151,73 @@ export class TransactionList {
                     }
                 }
             })
+        })
+        tbody.querySelectorAll(".edit-btn").forEach((button) => {
+            button.addEventListener("click", async (e) => {
+                const id = parseInt(e.target.dataset.id);
+                try {
+                    const transactions = await getTransactions();
+                    const transaction = transactions.find(t => t.id === id);
+                    const form = document.createElement('form');
+                    form.innerHTML = `
+                            <div class="form-group">
+                                <label>Date</label>
+                                <input type="month" id="edit-month" value="${transaction.date.slice(0, 7)}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Type</label>
+                                <select id="edit-type">
+                                    <option value="income" ${transaction.type === 'income' ? 'selected' : ''}>Income</option>
+                                    <option value="expense" ${transaction.type === 'expense' ? 'selected' : ''}>Expense</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Category</label>
+                                <select id="edit-category"></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Amount</label>
+                                <input type="number" id="edit-amount" value="${transaction.amount}" step="0.01" required>
+                            </div>
+                            <button type="submit" class="submitBtn-form">Save</button>
+                        `;
+                        const categorySelect = form.querySelector("#edit-category");
+                        this.categories.forEach(category => {
+                            const option = document.createElement("option");
+                            option.value = category.id;
+                            option.textContent = category.name;
+                            option.selected = category.id === transaction.category;
+                            categorySelect.appendChild(option);
+                        });
+                        form.onsubmit = async (e) => {
+                            e.preventDefault();
+                            const updatedData = {
+                                date: new Date(form.querySelector('#edit-month').value).toISOString(),
+                                type: form.querySelector("#edit-type").value,
+                                category: parseInt(categorySelect.value),
+                                amount: parseFloat(form.querySelector("#edit-amount").value)
+                            };
+                            try {
+                                await updateTransaction(id, updatedData);
+                                this.loadTransactions();
+                                new SummaryCard()._updateSummary();
+                                new Toast('Transaction updated').render();
+                                dialog.close();
+
+                            } catch (error) {
+                                console.log("Error updating transaction:", error);
+                            }
+                        }
+
+                        const dialog = document.createElement('dialog');
+                        dialog.appendChild(form);
+                        document.body.appendChild(dialog);
+                        dialog.showModal();
+                } catch (error) {
+                    console.error("Error fetching transaction:", error);
+                }
+
+            }) 
         })
     }
 
@@ -207,7 +278,7 @@ export class TransactionList {
                 </tr>
             </thead>
             <tbody>
-                <tr><td colspan="5" class="empty-state">Loading transactions...</td></tr>
+                <tr><td colspan="6" class="empty-state">Loading transactions...</td></tr>
             </tbody>
         `;
         const scrollableDiv = document.createElement("div");

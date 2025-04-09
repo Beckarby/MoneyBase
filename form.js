@@ -5,6 +5,7 @@ import { TransactionList } from "./transactions.js";
 import { ComparisonView } from "./comparison.js";
 import { Toast } from "./toast.js";
 import { SummaryCard } from "./summary.js";
+import { CategoryPieChart } from "./graph.js";
 
 export class Form {
     constructor() {
@@ -154,6 +155,45 @@ dbReady.then(async () => {
     const formsWrapper = document.createElement("div");
     formsWrapper.className = "forms-wrapper";
     formsWrapper.append(transactionForm.render(), estimatedForm.render());
+
+    const pieChartContainer = document.getElementById("category-pie-chart-container");
+    const pieChartCanvas = document.getElementById("categoryPieChartCanvas"); // Get the canvas element
+
+    let categoryPieChartInstance;
+    
+    if (pieChartContainer && pieChartCanvas) {
+        categoryPieChartInstance = new CategoryPieChart("categoryPieChartCanvas"); // Pass canvas ID
+        await categoryPieChartInstance.render(); // Render the chart
+    } else {
+        console.error("Pie chart container or canvas not found in index.html.");
+    }
+
+    document.addEventListener("transactionAdded", async () => {
+        // Optionally reload transaction list first if needed
+        // await transactionList.loadTransactions();
+        if (categoryPieChartInstance) {
+             await categoryPieChartInstance.updateChart();
+        }
+    });
+
+    document.addEventListener("transactionDeleted", async () => { // Assuming you dispatch this event
+        if (categoryPieChartInstance) {
+           await categoryPieChartInstance.updateChart();
+        }
+    });
+
+    const transactionListContainer = document.getElementById("transactions-container");
+    if (!transactionListContainer) {
+        console.error("Transaction container not found.");
+    } else {
+        const transactionList = new TransactionList(transactionListContainer);
+        transactionList.render();
+        transactionList.loadTransactions(); // Load initial transactions
+
+         // Modify TransactionList's delete handler to dispatch an event or call update directly
+         // This requires modifying transactions.js to dispatch 'transactionDeleted'
+         // or making the chart instance accessible to it.
+    }
     
     // Add to transactions view
     container.appendChild(formsWrapper);
