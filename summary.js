@@ -113,54 +113,53 @@ export class SummaryCard {
         }
     }
 
-    async _generateReport() {
+    async _generateReport(year, month) {
         await this.loadCategories();
-        const transactions = await this._getTransactionsByMonth();
-        const estimated = await getEstimatedExpenses();
-
+        const transactions = await this._getTransactionsByMonth(year, month);
+        const estimated = await getEstimatedExpenses(year, month);
+    
         const totals = transactions.reduce((acc, t) => {
             acc[t.type] = (acc[t.type] || 0) + t.amount;
             return acc;
         }, { income: 0, expense: 0 });
         const estimatedTotal = estimated.reduce((sum, e) => sum + e.amount, 0);
-
-        let reportContent = `"Monthly Financial Report for <span class="math-inline">\{year\}\-</span>{String(month).padStart(2, '0')}"\n\n`;
-        reportContent += `"Summary"\n`;
-        reportContent += `"Category","Amount"\n`;
-        reportContent += `"Total Income: ",${totals.income.toFixed(2)}\n`;
-        reportContent += `"Total Expenses:",${totals.expense.toFixed(2)}\n`;
-        reportContent += `"Estimated Expenses:",${estimatedTotal.toFixed(2)}\n`;
-        reportContent += `"Net (Income - Expenses): ",${(totals.income - totals.expense).toFixed(2)}\n\n`;
-
+    
+        let reportContent = `Monthly Financial Report for ${year}-${String(month).padStart(2, '0')}\n\n`;
+        reportContent += "Summary\n";
+        reportContent += "Category,Amount\n";
+        reportContent += `Total Income,${totals.income.toFixed(2)}\n`;
+        reportContent += `Total Expenses,${totals.expense.toFixed(2)}\n`;
+        reportContent += `Estimated Expenses,${estimatedTotal.toFixed(2)}\n`;
+        reportContent += `Net (Income - Expenses),${(totals.income - totals.expense).toFixed(2)}\n\n`;
+    
         if (transactions.length > 0) {
-            reportContent += `"Detailed Transactions"\n`;
-            reportContent += `"Date","Type","Category","Amount"\n`;
+            reportContent += "Detailed Transactions\n";
+            reportContent += "Date,Type,Category,Amount\n";
             transactions.forEach(t => {
-                const dateStr = new Date(t.date).toLocaleDateString();
+                const dateStr = new Date(t.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long' });
                 const categoryName = this._getCategoryName(t.category);
-                reportContent += `"<span class="math-inline">\{dateStr\}","</span>{t.type}","<span class="math-inline">\{categoryName\}",</span>{t.amount.toFixed(2)}\n`;
+                reportContent += `${dateStr},${t.type},${categoryName},${t.amount.toFixed(2)}\n`;
             });
-            reportContent += `\n`;
+            reportContent += "\n";
         } else {
-            reportContent += `"No transactions recorded for this month."\n\n`;
+            reportContent += "No transactions recorded for this month.\n\n";
         }
-
+    
         if (estimated.length > 0) {
-            reportContent += `"Estimated Expenses Breakdown"\n`;
-            reportContent += `"Category","Amount"\n`;
+            reportContent += "Estimated Expenses Breakdown\n";
+            reportContent += "Category,Amount\n";
             estimated.forEach(e => {
                 const categoryName = this._getCategoryName(e.categoryId);
-                reportContent += `"<span class="math-inline">\{categoryName\}",</span>{e.amount.toFixed(2)}\n`;
+                reportContent += `${categoryName},${e.amount.toFixed(2)}\n`;
             });
         } else {
-             reportContent += `"No estimated expenses recorded for this month."\n`;
+            reportContent += "No estimated expenses recorded for this month.\n";
         }
-
+    
         return reportContent;
     }
-
     _downloadReport(content, filename) {
-        const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' }); // Use text/csv for CSV
+        const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.setAttribute("href", url);
@@ -168,8 +167,7 @@ export class SummaryCard {
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url); 
+        
     }
 
 

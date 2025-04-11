@@ -52,26 +52,12 @@ export class ComparisonView {
             
             // Render the chart
             await this.chart.render(chartContainer);
-            const categoryData = await getCategorySpending(2023, 11);
-            const pieCanvas = document.createElement('canvas');
-            chartContainer.appendChild(pieCanvas);
-        
-            new Chart(pieCanvas.getContext('2d'), {
-                type: 'pie',
-                data: {
-                    labels: Object.keys(categoryData),
-                    datasets: [{
-                        data: Object.values(categoryData),
-                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
-                    }]
-                }
-            });
+                    
             } catch (error) {
                 console.log("Failed to initialize comparison view");
             }
 
-        
-            }
-
+    
+    }
     
 }

@@ -70,7 +70,7 @@ export class EstimatedForm {
         submitBtn.textContent = "Save Estimate";
         submitBtn.classList.add("submitBtn-form");
 
-        form.append(monthGroup, categoryGroup, amountGroup, submitBtn);
+        form.append(amountGroup, monthGroup, categoryGroup, submitBtn);
 
         form.addEventListener("submit", async (e) => {
             e.preventDefault();

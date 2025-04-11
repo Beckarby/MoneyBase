@@ -4,8 +4,8 @@ export class ExpenseComparisonChart {
     constructor() {
         this.canvas = document.createElement("canvas");
         this.canvas.id = "expenseComparisonChart";
-        this.canvas.width = 800;
-        this.canvas.height = 400;
+        this.canvas.width = 600;
+        this.canvas.height = 800;
         this.chart = null;
     }
 
@@ -125,7 +125,6 @@ export class ExpenseComparisonChart {
                         ),
                         backgroundColor: 'transparent',
                         borderWidth: 2,
-                        type: 'line',
                         tension: 0.1,
                         fill: false
                     }
@@ -151,6 +150,9 @@ export class ExpenseComparisonChart {
                     }
                 },
                 plugins: {
+                    legend: {
+                        position: 'top',
+                    },
                     tooltip: {
                         callbacks: {
                             label: function(context) {

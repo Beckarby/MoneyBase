@@ -90,6 +90,14 @@ export class Form {
         submitBtn.textContent = "Add Entry";
         submitBtn.classList.add("submitBtn-form");
 
+        // const img = document.createElement("img");
+        // img.src = "MoneyBase/images/saveEstimate.png";
+        // img.all = "save";
+        // img.style.width = "20px";
+        // img.style.height = "20px";
+        // img.style.marginLeft = "5px";
+        //submitBtn.appendChild(img);
+
         form.append(typeGroup, amountGroup, dateGroup, categoryGroup, submitBtn);
 
         form.addEventListener("submit", async (e) => {

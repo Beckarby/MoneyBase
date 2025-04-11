@@ -157,11 +157,7 @@ export function getEstimatedExpenses(year, month) {
             request = index.getAll([year, month]);
         } else {
             request = store.getAll();
-        }
-
-        
-        //const range = IDBKeyRange.only([year, month]);
-        
+        }        
 
         request.onsuccess = (event) => resolve(event.target.result);
         request.onerror = (event) => reject(event.target.error);
